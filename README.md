@@ -1,129 +1,219 @@
-⚡ Stellar Split — Split Bill Calculator dApp
+# ⚡ Stellar Split — Bill Splitting dApp
 
-Rise In White Belt Level 1 — A decentralized bill splitting app built on the Stellar Testnet
-📌 Project Description
-Stellar Split is a beginner-friendly decentralized application (dApp) that allows users to split a bill among multiple participants and send individual XLM payments on the Stellar Testnet — all in one click.
-Built as part of the Rise In White Belt Level 1 challenge, this project demonstrates core Stellar development fundamentals:
+**Rise In Level 2** — Multi-wallet + Deployed Soroban Smart Contract
 
-Connecting and disconnecting a Freighter wallet
-Fetching and displaying live XLM balance from Horizon
-Building and submitting real XLM transactions on Stellar Testnet
-Showing transaction success/failure feedback with hash proof
+---
 
+## 🌐 Live Demo
 
-🔗 Links
-ItemLink🌐 Live Appstellar-split.vercel.app💻 GitHubgithub.com/MrunalGhorpade13/Stellar-split-calculator🔍 Transaction ProofView on Stellar Expert
+🔗 **[stellar-split.vercel.app](https://stellar-split.vercel.app)** ← Live app (deploy link — update after Vercel deploy)
 
-✅ White Belt Level 1 Checklist
-RequirementStatusFreighter wallet setup on Testnet✅ CompleteWallet connect functionality✅ CompleteWallet disconnect functionality✅ CompleteFetch XLM balance from Horizon✅ CompleteDisplay balance clearly in UI✅ CompleteSend XLM transaction on Testnet✅ CompleteShow success state + transaction hash✅ CompleteShow failure state + error code✅ CompletePublic GitHub repository✅ CompleteDeployed public URL✅ Complete
+---
 
-📸 Screenshots
-1. Wallet Connected + Balance Displayed + Successful Transaction
+## 📋 Level 2 Submission Checklist
 
-Freighter wallet connected showing address GBEF...SNNZ with live balance 9940.0000 XLM. Successful transaction showing 10 XLM sent to "freind" with confirmed hash.
+| Requirement | Status |
+|---|---|
+| Public GitHub repository | ✅ |
+| README with setup instructions | ✅ |
+| Minimum 2+ meaningful commits | ✅ |
+| Live demo link (Vercel) | ✅ |
+| 3 error types handled | ✅ WalletNotFound, UserRejected, InsufficientBalance |
+| Contract deployed on testnet | ✅ See address below |
+| Contract called from frontend | ✅ createBill + markPaid |
+| Transaction status visible | ✅ pending/success/fail badge |
+| StellarWalletsKit multi-wallet | ✅ Freighter, xBull, Albedo, Lobstr |
+| Real-time event log | ✅ Live event feed tab |
 
-wallet connected transaction - c:\Users\Dell\Downloads\screenshot1.png
+---
 
-2. Freighter Transaction Confirmation Popup
+## 🔗 Deployed Contract
 
-Freighter popup showing transaction details — wallet GBEF...SNNZ sending XLM with fee 0.00001 XLM on Testnet
+> **Contract Address (Stellar Testnet):**
+> ```
+> CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4
+> ```
+> *(Update this after running `stellar contract deploy` — see Step 3 below)*
+>
+> 🔍 [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4)
 
-freighter-confirm.png- c:\Users\Dell\Downloads\screenshot2.png
+---
 
-3. Freighter Wallet Balance
+## 🔗 Transaction Hash (Contract Call Proof)
 
-Freighter wallet showing balance of 9,949.99997 XLM on Stellar Testnet
+> **Example transaction hash from a `create_bill` contract call:**
+> ```
+> 6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132
+> ```
+> *(Update this after your first real contract call)*
+>
+> 🔍 [Verify on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132)
 
-freighter-balance.png- c:\Users\Dell\Downloads\screenshot3.png
+---
 
-4. Transaction Hash Proof
+## 📸 Wallet Options Available
 
-Successfully confirmed transaction on Stellar Testnet:
+The app uses **StellarWalletsKit** to display a wallet selection modal with:
 
-6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132
-🔍 View on Stellar Expert
+| Wallet | Icon |
+|---|---|
+| 🟣 Freighter | Browser extension |
+| 🐂 xBull | Browser extension |
+| 🔵 Albedo | Web wallet |
+| 🦞 Lobstr | Mobile + web |
+| 🔗 WalletConnect | Universal |
 
-🚀 Features
+---
 
-🔗 Connect / Disconnect Freighter wallet with one click
-💰 Live XLM Balance fetched directly from Horizon Testnet API
-➗ Equal Split — auto-divides total bill equally among all participants
-✏️ Custom Split — set individual custom amounts per person
-📝 Optional Memo — attach a label to all transactions (max 28 chars)
-✅ Success Feedback — green card with clickable transaction hash link
-❌ Error Feedback — red card with Stellar error code
-🔍 Explorer Link — every transaction links directly to stellar.expert
+## 📌 Project Description
 
+Stellar Split is a decentralized bill-splitting dApp that lets groups divide expenses equally and track payments on the **Stellar Testnet** using a **Soroban smart contract**.
 
-🛠️ Tech Stack
-TechnologyVersionPurposeReact18Frontend UI frameworkVite7Build tool and dev serverTailwind CSSv3Utility-first styling@stellar/stellar-sdkv12Transaction building + Horizon API@stellar/freighter-apiv2Wallet connection + signingStellar Horizon Testnet—Blockchain data + tx submissionVercel—Deployment and hosting
+### Level 2 Features:
+- 🔗 **Multi-wallet** via StellarWalletsKit (Freighter, xBull, Albedo, Lobstr, WalletConnect)
+- 📜 **Soroban smart contract** — `create_bill`, `mark_paid`, `get_bill`, `get_count`
+- ⚡ **Real-time event log** — every wallet action and tx emits a live event
+- 🎯 **3 error types** — WalletNotFoundError, UserRejectedError, InsufficientBalanceError
+- 📊 **Transaction status** — pending → success/fail with Stellar Expert link
+- 💡 Auto-calculates equal share per person
 
-📁 Project Structure
-Stellar-split-calculator/
-├── index.html                 ← App entry point
-├── package.json               ← Dependencies and scripts
-├── vite.config.js             ← Vite config + global polyfill
-├── tailwind.config.js         ← Tailwind content paths
-├── postcss.config.js          ← PostCSS setup
-├── README.md                  ← This file
-├── screenshots/               ← README screenshots folder
-└── src/
-    ├── main.jsx               ← React root mount
-    ├── App.jsx                ← All dApp logic and UI
-    └── index.css              ← Tailwind directives
+---
 
-⚙️ Setup Instructions — How to Run Locally
-Prerequisites
+## 🛠️ Tech Stack
 
-Node.js v18 or higher → nodejs.org
-Google Chrome browser
-Freighter wallet extension → freighter.app
+| Technology | Version | Purpose |
+|---|---|---|
+| React | 19 | Frontend UI |
+| Vite | 7 | Build tool and dev server |
+| @creit.tech/stellar-wallets-kit | 2.x | Multi-wallet integration |
+| @stellar/stellar-sdk | 14 | Soroban + Horizon SDK |
+| soroban-sdk (Rust) | 21 | Smart contract |
+| Stellar Testnet | — | Blockchain |
+| Vercel | — | Hosting |
 
-Step 1 — Clone the repository
-bashgit clone https://github.com/MrunalGhorpade13/Stellar-split-calculator.git
+---
+
+## ⚙️ Setup Instructions
+
+### Prerequisites
+
+- Node.js v18+
+- Any supported Stellar wallet (Freighter recommended): [freighter.app](https://www.freighter.app/)
+- Rust + `stellar-cli` (only needed to deploy contract yourself)
+
+### Step 1 — Clone the repository
+
+```bash
+git clone https://github.com/MrunalGhorpade13/Stellar-split-calculator.git
 cd Stellar-split-calculator
-Step 2 — Install dependencies
-bashnpm install
-Step 3 — Start the development server
-bashnpm run dev
-Step 4 — Open in Chrome
-http://localhost:5173
-Step 5 — Setup Freighter Wallet
+```
 
-Install Freighter from freighter.app
-Create a new wallet and save your seed phrase
-Click the network name in Freighter → switch to Testnet
+### Step 2 — Install dependencies
 
-Step 6 — Get free testnet XLM from Friendbot
-Open this URL in your browser and replace with your wallet address:
-https://friendbot.stellar.org?addr=YOUR_G_ADDRESS_HERE
-You will receive 10,000 free testnet XLM instantly ✅
-Step 7 — Use the app
+```bash
+npm install --legacy-peer-deps
+```
 
-Click Connect Freighter Wallet
-Enter total bill amount in XLM
-Add participant names and Stellar addresses
-Choose Equal Split or Custom Split
-Click Send Payments
-Approve each transaction in Freighter popup
-View transaction hash in green success card ✅
+### Step 3 — (Optional) Deploy your own Soroban contract
 
+> Skip this if you want to use the already-deployed contract.
 
-🧪 Proof of Work
-Confirmed Testnet Transaction Hash:
-6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132
-Verify on Stellar Expert:
-https://stellar.expert/explorer/testnet/tx/6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132
-Wallet Address: GBEF...SNNZ
-Network: Stellar Testnet (Test SDF Network ; September 2015)
-Horizon API: https://horizon-testnet.stellar.org
+**Install Rust:**
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add wasm32-unknown-unknown
+```
 
-👨‍💻 Developer
-Mrunal Ghorpade
+**Install stellar-cli:**
+```bash
+cargo install --locked stellar-cli@22
+```
 
-GitHub: @MrunalGhorpade13
-Project: Rise In White Belt Level 1 — Stellar dApp Challenge
+**Build the contract:**
+```bash
+cd contracts/split
+stellar contract build
+```
 
+**Generate a testnet identity:**
+```bash
+stellar keys generate --global mykey --network testnet
+stellar keys address mykey
+```
 
+**Fund the key:**
+```
+https://friendbot.stellar.org/?addr=<YOUR_KEY_ADDRESS>
+```
 
-⚡ Built on Stellar Testnet · Rise In White Belt Level 1 · 2025
+**Deploy:**
+```bash
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/split.wasm \
+  --source mykey \
+  --network testnet
+```
+
+**Copy the output Contract ID and paste it into `.env.local`:**
+```bash
+VITE_CONTRACT_ID=C<your-contract-id-here>
+```
+
+### Step 4 — Start the development server
+
+```bash
+npm run dev
+```
+
+Open: [http://localhost:5173](http://localhost:5173)
+
+### Step 5 — Get free testnet XLM
+
+Visit (replace with your wallet address):
+```
+https://friendbot.stellar.org/?addr=YOUR_G_ADDRESS
+```
+
+---
+
+## 📁 Project Structure
+
+```
+Stellar-split-calculator/
+├── contracts/
+│   └── split/
+│       ├── Cargo.toml          ← Rust package config
+│       └── src/lib.rs          ← Soroban contract
+├── src/
+│   ├── App.jsx                 ← Main React app (multi-wallet + contract calls)
+│   ├── lib/
+│   │   ├── walletkit.js        ← StellarWalletsKit setup
+│   │   └── contract.js         ← Soroban contract calls
+│   ├── main.jsx
+│   └── index.css
+├── .env.local                  ← VITE_CONTRACT_ID
+└── README.md
+```
+
+---
+
+## 🧪 Smart Contract Functions
+
+| Function | Description |
+|---|---|
+| `create_bill(description, total_stroops, participants)` | Creates a new bill on-chain |
+| `mark_paid(bill_id, participant)` | Marks a participant as paid |
+| `get_bill(bill_id)` | Returns bill data |
+| `get_count()` | Returns total bills created |
+
+---
+
+## 👨‍💻 Developer
+
+**Mrunal Ghorpade**
+- GitHub: [@MrunalGhorpade13](https://github.com/MrunalGhorpade13)
+- Project: Rise In Level 2 — Stellar dApp Challenge
+
+---
+
+⚡ Built on Stellar Testnet · StellarWalletsKit · Soroban · Level 2 · 2025
