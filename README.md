@@ -1,7 +1,9 @@
-# Stellar Split - Level 2
+<div style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333;">
+
+# Stellar Split: Level 2
 
 Split bills trustlessly on the Stellar blockchain.
-A multi-wallet dApp integrated with a deployed Soroban smart contract.
+A multi-wallet decentralized application integrated with a deployed Soroban smart contract.
 
 **Live Demo:** [https://stellar-split-calculator.vercel.app](https://stellar-split-calculator.vercel.app)
 **Contract Address:** `CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4` *(update after deploy)*
@@ -32,7 +34,7 @@ A multi-wallet dApp integrated with a deployed Soroban smart contract.
 | 7 | Transaction status tracked | Complete (Pending, Success, Failure tracked with hash link) |
 | 8 | Real-time event feed | Complete (Live Events log tab) |
 | 9 | 2+ meaningful git commits | Complete (Mainline features merged) |
-| 10 | README with live demo + contract address | Complete (Documented here) |
+| 10 | README with live demo and contract address | Complete (Documented here) |
 
 ---
 
@@ -67,7 +69,7 @@ A multi-wallet dApp integrated with a deployed Soroban smart contract.
 ### Running Locally
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<your-username>/stellar-split-calculator.git
+git clone https://github.com/MrunalGhorpade13/Stellar-split-calculator.git
 cd stellar-split-calculator/Stellar-split-calculator
 
 # 2. Install dependencies
@@ -141,5 +143,7 @@ After deployment, copy the generated URL and update the repository's live demo l
 
 ---
 
-## Developer
-Developed for the Stellar Blockchain ecosystem.
+**Developer:** Mrunal Ghorpade  
+*Developed for the Stellar Blockchain ecosystem.*
+
+</div>
