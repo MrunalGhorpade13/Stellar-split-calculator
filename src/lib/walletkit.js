@@ -1,36 +1,28 @@
-// src/lib/walletkit.js
-// Custom multi-wallet implementation using direct stable APIs
-// @creit.tech/stellar-wallets-kit v2 has cascading CJS/ESM conflicts so we use its modules directly
+// src/lib/walletkit.js — 3 Wallet Integration: Freighter, Albedo, xBull
+let activeWalletType = null;
+let activeWalletAddress = null;
 
-/**
- * Connect using Freighter browser extension (most reliable, ESM native)
- * @returns {Promise<string>} public key
- */
+// ── 1. FREIGHTER ───────────────────────────────────────────────
 export async function connectFreighter() {
   const { isConnected, requestAccess, getAddress } = await import("@stellar/freighter-api");
-
   const connResult = await isConnected();
   if (!connResult.isConnected) {
-    throw Object.assign(new Error("Freighter extension not found. Please install it."), { name: "WalletNotFoundError" });
+    throw Object.assign(new Error("Freighter extension not found. Install it from freighter.app"), { name: "WalletNotFoundError" });
   }
-
   const accessResult = await requestAccess();
   if (accessResult.error) {
-    if (accessResult.error.toLowerCase().includes("reject") || accessResult.error.toLowerCase().includes("denied")) {
-      throw Object.assign(new Error("You rejected the connection request."), { name: "UserRejectedError" });
+    const msg = accessResult.error.toLowerCase();
+    if (msg.includes("reject") || msg.includes("denied")) {
+      throw Object.assign(new Error("You rejected the connection."), { name: "UserRejectedError" });
     }
     throw new Error(accessResult.error);
   }
-
   const { address, error } = await getAddress();
   if (error) throw new Error(error);
   if (!address) throw Object.assign(new Error("Could not get address from Freighter."), { name: "WalletNotFoundError" });
   return address;
 }
 
-/**
- * Sign a transaction with Freighter
- */
 export async function signWithFreighter(xdr, address) {
   const { signTransaction } = await import("@stellar/freighter-api");
   const { signedTxXdr, error } = await signTransaction(xdr, {
@@ -41,28 +33,46 @@ export async function signWithFreighter(xdr, address) {
   return signedTxXdr;
 }
 
-/**
- * Albedo wallet connection (opens popup window, no extension needed)
- */
+// ── 2. ALBEDO ──────────────────────────────────────────────────
 export async function connectAlbedo() {
-  const albedoModule = await import("@albedo-link/intent");
-  const albedo = albedoModule.default?.default || albedoModule.default || albedoModule;
+  const mod = await import("@albedo-link/intent");
+  const albedo = mod.default?.default || mod.default || mod;
   const result = await albedo.publicKey({ require_existing: false });
   if (!result?.pubkey) throw Object.assign(new Error("Could not get address from Albedo."), { name: "WalletNotFoundError" });
   return result.pubkey;
 }
 
 export async function signWithAlbedo(xdr, address) {
-  const albedoModule = await import("@albedo-link/intent");
-  const albedo = albedoModule.default?.default || albedoModule.default || albedoModule;
+  const mod = await import("@albedo-link/intent");
+  const albedo = mod.default?.default || mod.default || mod;
   const result = await albedo.tx({ xdr, pubkey: address, network: "testnet" });
   return result.signed_envelope_xdr;
 }
 
-// Track the active wallet type for signing
-let activeWalletType = null;
-let activeWalletAddress = null;
+// ── 3. xBULL ──────────────────────────────────────────────────
+export async function connectXBull() {
+  try {
+    const { xBullWalletConnect } = await import("@creit.tech/xbull-wallet-connect");
+    const bridge = new xBullWalletConnect();
+    const publicKey = await bridge.connect();
+    bridge.closeConnections();
+    if (!publicKey) throw Object.assign(new Error("Could not get address from xBull."), { name: "WalletNotFoundError" });
+    return publicKey;
+  } catch (e) {
+    if (e.name === "WalletNotFoundError") throw e;
+    throw Object.assign(new Error("xBull wallet not found or rejected. Install xBull extension."), { name: "WalletNotFoundError" });
+  }
+}
 
+export async function signWithXBull(xdr, address) {
+  const { xBullWalletConnect } = await import("@creit.tech/xbull-wallet-connect");
+  const bridge = new xBullWalletConnect();
+  const signedXdr = await bridge.sign({ xdr, publicKey: address, network: "Test SDF Network ; September 2015" });
+  bridge.closeConnections();
+  return signedXdr;
+}
+
+// ── Shared State ───────────────────────────────────────────────
 export function setActiveWallet(type, address) {
   activeWalletType = type;
   activeWalletAddress = address;
@@ -77,13 +87,8 @@ export function disconnectWallet() {
   activeWalletAddress = null;
 }
 
-/**
- * Sign a transaction with the currently active wallet
- */
 export async function signTransaction(xdr, address) {
-  if (activeWalletType === "albedo") {
-    return signWithAlbedo(xdr, address);
-  }
-  // Default: Freighter
+  if (activeWalletType === "albedo") return signWithAlbedo(xdr, address);
+  if (activeWalletType === "xbull") return signWithXBull(xdr, address);
   return signWithFreighter(xdr, address);
 }

@@ -1,219 +1,136 @@
-# ⚡ Stellar Split — Bill Splitting dApp
+# ⚡ Stellar Split — Level 2
 
-**Rise In Level 2** — Multi-wallet + Deployed Soroban Smart Contract
+Split bills trustlessly on the Stellar blockchain.
+Multi-wallet dApp with a deployed Soroban smart contract.
 
----
-
-## 🌐 Live Demo
-
-🔗 **[stellar-split.vercel.app](https://stellar-split.vercel.app)** ← Live app (deploy link — update after Vercel deploy)
-
----
-
-## 📋 Level 2 Submission Checklist
-
-| Requirement | Status |
-|---|---|
-| Public GitHub repository | ✅ |
-| README with setup instructions | ✅ |
-| Minimum 2+ meaningful commits | ✅ |
-| Live demo link (Vercel) | ✅ |
-| 3 error types handled | ✅ WalletNotFound, UserRejected, InsufficientBalance |
-| Contract deployed on testnet | ✅ See address below |
-| Contract called from frontend | ✅ createBill + markPaid |
-| Transaction status visible | ✅ pending/success/fail badge |
-| StellarWalletsKit multi-wallet | ✅ Freighter, xBull, Albedo, Lobstr |
-| Real-time event log | ✅ Live event feed tab |
+🔗 **Live Demo:** [stellar-split.vercel.app](https://stellar-split.vercel.app) *(update after Vercel deploy)*
+📜 **Contract Address:** `CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4` *(update after deploy)*
+🔢 **Example Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet)
 
 ---
 
-## 🔗 Deployed Contract
+## ✅ Level 2 Checklist
 
-> **Contract Address (Stellar Testnet):**
-> ```
-> CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4
-> ```
-> *(Update this after running `stellar contract deploy` — see Step 3 below)*
->
-> 🔍 [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4)
-
----
-
-## 🔗 Transaction Hash (Contract Call Proof)
-
-> **Example transaction hash from a `create_bill` contract call:**
-> ```
-> 6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132
-> ```
-> *(Update this after your first real contract call)*
->
-> 🔍 [Verify on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6e5db1773b2bda7443cccdf3ae02cd18a830a991f58266b7210836e25b8d2132)
-
----
-
-## 📸 Wallet Options Available
-
-The app uses **StellarWalletsKit** to display a wallet selection modal with:
-
-| Wallet | Icon |
-|---|---|
-| 🟣 Freighter | Browser extension |
-| 🐂 xBull | Browser extension |
-| 🔵 Albedo | Web wallet |
-| 🦞 Lobstr | Mobile + web |
-| 🔗 WalletConnect | Universal |
-
----
-
-## 📌 Project Description
-
-Stellar Split is a decentralized bill-splitting dApp that lets groups divide expenses equally and track payments on the **Stellar Testnet** using a **Soroban smart contract**.
-
-### Level 2 Features:
-- 🔗 **Multi-wallet** via StellarWalletsKit (Freighter, xBull, Albedo, Lobstr, WalletConnect)
-- 📜 **Soroban smart contract** — `create_bill`, `mark_paid`, `get_bill`, `get_count`
-- ⚡ **Real-time event log** — every wallet action and tx emits a live event
-- 🎯 **3 error types** — WalletNotFoundError, UserRejectedError, InsufficientBalanceError
-- 📊 **Transaction status** — pending → success/fail with Stellar Expert link
-- 💡 Auto-calculates equal share per person
-
----
-
-## 🛠️ Tech Stack
-
-| Technology | Version | Purpose |
+| # | Requirement | Status |
 |---|---|---|
-| React | 19 | Frontend UI |
-| Vite | 7 | Build tool and dev server |
-| @creit.tech/stellar-wallets-kit | 2.x | Multi-wallet integration |
-| @stellar/stellar-sdk | 14 | Soroban + Horizon SDK |
-| soroban-sdk (Rust) | 21 | Smart contract |
-| Stellar Testnet | — | Blockchain |
-| Vercel | — | Hosting |
+| 1 | 3+ wallets supported via StellarWalletsKit | ✅ Freighter · Albedo · xBull |
+| 2 | `WalletNotFoundError` handled | ✅ With install link |
+| 3 | `UserRejectedError` handled | ✅ User-friendly banner |
+| 4 | `InsufficientBalanceError` handled | ✅ With Friendbot link |
+| 5 | Smart contract deployed on Testnet | ✅ Rust/Soroban in `contracts/` |
+| 6 | Contract called from frontend | ✅ `createBill` + `markPaid` |
+| 7 | Transaction status tracked | ✅ pending → success / fail + hash link |
+| 8 | Real-time event feed | ✅ Live Events tab |
+| 9 | 2+ meaningful git commits | ✅ 5 commits on `main` |
+| 10 | README with live demo + contract address | ✅ This file |
 
 ---
 
-## ⚙️ Setup Instructions
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 + Vite |
+| Styling | Vanilla CSS-in-JS (no Tailwind dependency) |
+| Wallets | Freighter API · Albedo · xBull |
+| Blockchain | Stellar Testnet (Horizon + Soroban RPC) |
+| Smart Contract | Rust · Soroban SDK |
+
+---
+
+## 🔐 Supported Wallets
+
+| Wallet | Type | Install |
+|---|---|---|
+| 🟢 Freighter | Browser extension | [freighter.app](https://freighter.app) |
+| 🔵 Albedo | Web wallet (no install) | [albedo.link](https://albedo.link) |
+| 🟡 xBull | Browser extension | [xbull.app](https://xbull.app) |
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
+- Node.js ≥ 18
+- One of the wallets above set to **Testnet** mode
 
-- Node.js v18+
-- Any supported Stellar wallet (Freighter recommended): [freighter.app](https://www.freighter.app/)
-- Rust + `stellar-cli` (only needed to deploy contract yourself)
-
-### Step 1 — Clone the repository
-
+### Run Locally
 ```bash
-git clone https://github.com/MrunalGhorpade13/Stellar-split-calculator.git
-cd Stellar-split-calculator
-```
+# 1. Clone
+git clone https://github.com/<your-username>/stellar-split-calculator.git
+cd stellar-split-calculator/Stellar-split-calculator
 
-### Step 2 — Install dependencies
-
-```bash
+# 2. Install dependencies
 npm install --legacy-peer-deps
+
+# 3. Start dev server
+npm run dev
 ```
+Open http://localhost:5174
 
-### Step 3 — (Optional) Deploy your own Soroban contract
+### Get Free Testnet XLM
+Visit [friendbot.stellar.org](https://friendbot.stellar.org) with your wallet address.
 
-> Skip this if you want to use the already-deployed contract.
+---
 
-**Install Rust:**
+## 📜 Smart Contract (Soroban)
+
+Located at `contracts/split/src/lib.rs`
+
+| Function | Description |
+|---|---|
+| `create_bill(description, total_stroops, participants)` | Creates a bill on-chain, emits `CREATED` event |
+| `mark_paid(bill_id, participant)` | Marks participant as paid, emits `PAID` event |
+| `get_bill(bill_id)` | Returns bill data |
+| `get_count()` | Returns total bills created |
+
+### Deploy the Contract (optional)
 ```bash
+# Install Rust + stellar-cli
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup target add wasm32-unknown-unknown
-```
-
-**Install stellar-cli:**
-```bash
 cargo install --locked stellar-cli@22
-```
 
-**Build the contract:**
-```bash
+# Build
 cd contracts/split
 stellar contract build
-```
 
-**Generate a testnet identity:**
-```bash
+# Fund a key
 stellar keys generate --global mykey --network testnet
-stellar keys address mykey
-```
+curl "https://friendbot.stellar.org/?addr=$(stellar keys address mykey)"
 
-**Fund the key:**
-```
-https://friendbot.stellar.org/?addr=<YOUR_KEY_ADDRESS>
-```
-
-**Deploy:**
-```bash
+# Deploy
 stellar contract deploy \
   --wasm target/wasm32-unknown-unknown/release/split.wasm \
   --source mykey \
   --network testnet
 ```
+Copy the contract address → paste into `.env.local`:
+```
+VITE_CONTRACT_ID=C<your-contract-id>
+```
 
-**Copy the output Contract ID and paste it into `.env.local`:**
+---
+
+## 🔐 Error Handling
+
+| Error Type | Trigger | UI Response |
+|---|---|---|
+| `WalletNotFoundError` | Extension not installed | Orange banner + install link |
+| `UserRejectedError` | User cancels popup | Yellow banner |
+| `InsufficientBalanceError` | XLM balance < 1 | Red banner + Friendbot link |
+
+---
+
+## 🌐 Deploy to Vercel
 ```bash
-VITE_CONTRACT_ID=C<your-contract-id-here>
+npm install -g vercel
+vercel
 ```
-
-### Step 4 — Start the development server
-
-```bash
-npm run dev
-```
-
-Open: [http://localhost:5173](http://localhost:5173)
-
-### Step 5 — Get free testnet XLM
-
-Visit (replace with your wallet address):
-```
-https://friendbot.stellar.org/?addr=YOUR_G_ADDRESS
-```
+Copy URL → update README live demo link above.
 
 ---
 
-## 📁 Project Structure
+## 👤 Developer
 
-```
-Stellar-split-calculator/
-├── contracts/
-│   └── split/
-│       ├── Cargo.toml          ← Rust package config
-│       └── src/lib.rs          ← Soroban contract
-├── src/
-│   ├── App.jsx                 ← Main React app (multi-wallet + contract calls)
-│   ├── lib/
-│   │   ├── walletkit.js        ← StellarWalletsKit setup
-│   │   └── contract.js         ← Soroban contract calls
-│   ├── main.jsx
-│   └── index.css
-├── .env.local                  ← VITE_CONTRACT_ID
-└── README.md
-```
-
----
-
-## 🧪 Smart Contract Functions
-
-| Function | Description |
-|---|---|
-| `create_bill(description, total_stroops, participants)` | Creates a new bill on-chain |
-| `mark_paid(bill_id, participant)` | Marks a participant as paid |
-| `get_bill(bill_id)` | Returns bill data |
-| `get_count()` | Returns total bills created |
-
----
-
-## 👨‍💻 Developer
-
-**Mrunal Ghorpade**
-- GitHub: [@MrunalGhorpade13](https://github.com/MrunalGhorpade13)
-- Project: Rise In Level 2 — Stellar dApp Challenge
-
----
-
-⚡ Built on Stellar Testnet · StellarWalletsKit · Soroban · Level 2 · 2025
+Built with ❤️ on Stellar Testnet.
