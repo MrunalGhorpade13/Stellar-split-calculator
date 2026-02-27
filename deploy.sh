@@ -19,7 +19,7 @@ rustup target add wasm32-unknown-unknown
 # 3. Install stellar-cli if missing
 if ! command -v stellar &> /dev/null; then
     echo "⚙️ Installing stellar-cli (this takes ~3-4 minutes)..."
-    cargo install --locked stellar-cli@22
+    cargo install --locked stellar-cli --version 22.0.0
 fi
 
 echo "🔨 Building the Soroban contract..."
