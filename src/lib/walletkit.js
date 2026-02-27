@@ -1,78 +1,89 @@
-// src/lib/walletkit.js — StellarWalletsKit v2.0.0 (lazy init, static class API)
+// src/lib/walletkit.js
+// Custom multi-wallet implementation using direct stable APIs
+// @creit.tech/stellar-wallets-kit v2 has cascading CJS/ESM conflicts so we use its modules directly
 
-let initialized = false;
+/**
+ * Connect using Freighter browser extension (most reliable, ESM native)
+ * @returns {Promise<string>} public key
+ */
+export async function connectFreighter() {
+  const { isConnected, requestAccess, getAddress } = await import("@stellar/freighter-api");
 
-function ensureInit() {
-  if (initialized) return;
-  initialized = true;
+  const connResult = await isConnected();
+  if (!connResult.isConnected) {
+    throw Object.assign(new Error("Freighter extension not found. Please install it."), { name: "WalletNotFoundError" });
+  }
 
-  // Lazy import to avoid running at module parse time (crashes Vite dep optimizer)
-  Promise.all([
-    import("@creit.tech/stellar-wallets-kit"),
-    import("@creit.tech/stellar-wallets-kit/modules/freighter"),
-    import("@creit.tech/stellar-wallets-kit/modules/albedo"),
-    import("@creit.tech/stellar-wallets-kit/modules/xbull"),
-    import("@creit.tech/stellar-wallets-kit/modules/lobstr"),
-  ]).then(([{ StellarWalletsKit, Networks }, { FreighterModule }, { AlbedoModule }, { xBullModule }, { LobstrModule }]) => {
-    StellarWalletsKit.init({
-      network: Networks.TESTNET,
-      modules: [
-        new FreighterModule(),
-        new xBullModule(),
-        new AlbedoModule(),
-        new LobstrModule(),
-      ],
-    });
-  });
+  const accessResult = await requestAccess();
+  if (accessResult.error) {
+    if (accessResult.error.toLowerCase().includes("reject") || accessResult.error.toLowerCase().includes("denied")) {
+      throw Object.assign(new Error("You rejected the connection request."), { name: "UserRejectedError" });
+    }
+    throw new Error(accessResult.error);
+  }
+
+  const { address, error } = await getAddress();
+  if (error) throw new Error(error);
+  if (!address) throw Object.assign(new Error("Could not get address from Freighter."), { name: "WalletNotFoundError" });
+  return address;
 }
 
 /**
- * Opens the StellarWalletsKit auth modal. Returns connected address string.
- * @returns {Promise<string>}
+ * Sign a transaction with Freighter
  */
-export const connectWallet = async () => {
-  const [{ StellarWalletsKit, Networks }, { FreighterModule }, { AlbedoModule }, { xBullModule }, { LobstrModule }] = await Promise.all([
-    import("@creit.tech/stellar-wallets-kit"),
-    import("@creit.tech/stellar-wallets-kit/modules/freighter"),
-    import("@creit.tech/stellar-wallets-kit/modules/albedo"),
-    import("@creit.tech/stellar-wallets-kit/modules/xbull"),
-    import("@creit.tech/stellar-wallets-kit/modules/lobstr"),
-  ]);
-
-  if (!initialized) {
-    StellarWalletsKit.init({
-      network: Networks.TESTNET,
-      modules: [
-        new FreighterModule(),
-        new xBullModule(),
-        new AlbedoModule(),
-        new LobstrModule(),
-      ],
-    });
-    initialized = true;
-  }
-
-  const { address } = await StellarWalletsKit.authModal();
-  return address;
-};
+export async function signWithFreighter(xdr, address) {
+  const { signTransaction } = await import("@stellar/freighter-api");
+  const { signedTxXdr, error } = await signTransaction(xdr, {
+    address,
+    networkPassphrase: "Test SDF Network ; September 2015",
+  });
+  if (error) throw new Error(error);
+  return signedTxXdr;
+}
 
 /**
- * Sign a transaction XDR via the active wallet.
- * @param {string} xdr
- * @param {string} address
- * @returns {Promise<string>} signed XDR
+ * Albedo wallet connection (opens popup window, no extension needed)
  */
-export const signTransaction = async (xdr, address) => {
-  const { StellarWalletsKit, Networks } = await import("@creit.tech/stellar-wallets-kit");
-  const { signedTxXdr } = await StellarWalletsKit.signTransaction(xdr, {
-    address,
-    networkPassphrase: Networks.TESTNET,
-  });
-  return signedTxXdr;
-};
+export async function connectAlbedo() {
+  const albedoModule = await import("@albedo-link/intent");
+  const albedo = albedoModule.default?.default || albedoModule.default || albedoModule;
+  const result = await albedo.publicKey({ require_existing: false });
+  if (!result?.pubkey) throw Object.assign(new Error("Could not get address from Albedo."), { name: "WalletNotFoundError" });
+  return result.pubkey;
+}
 
-export const disconnectWallet = async () => {
-  const { StellarWalletsKit } = await import("@creit.tech/stellar-wallets-kit");
-  await StellarWalletsKit.disconnect();
-  initialized = false;
-};
+export async function signWithAlbedo(xdr, address) {
+  const albedoModule = await import("@albedo-link/intent");
+  const albedo = albedoModule.default?.default || albedoModule.default || albedoModule;
+  const result = await albedo.tx({ xdr, pubkey: address, network: "testnet" });
+  return result.signed_envelope_xdr;
+}
+
+// Track the active wallet type for signing
+let activeWalletType = null;
+let activeWalletAddress = null;
+
+export function setActiveWallet(type, address) {
+  activeWalletType = type;
+  activeWalletAddress = address;
+}
+
+export function getActiveWallet() {
+  return { type: activeWalletType, address: activeWalletAddress };
+}
+
+export function disconnectWallet() {
+  activeWalletType = null;
+  activeWalletAddress = null;
+}
+
+/**
+ * Sign a transaction with the currently active wallet
+ */
+export async function signTransaction(xdr, address) {
+  if (activeWalletType === "albedo") {
+    return signWithAlbedo(xdr, address);
+  }
+  // Default: Freighter
+  return signWithFreighter(xdr, address);
+}

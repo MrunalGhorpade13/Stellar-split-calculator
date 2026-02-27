@@ -1,8 +1,14 @@
 // src/App.jsx — Stellar Split Calculator Level 2
-// Multi-wallet (StellarWalletsKit) + Real Soroban contract calls
+// Multi-wallet (Freighter + Albedo) + Real Soroban contract calls
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { connectWallet, disconnectWallet } from "./lib/walletkit";
+import { useState, useEffect, useCallback } from "react";
+import {
+  connectFreighter,
+  connectAlbedo,
+  disconnectWallet,
+  setActiveWallet,
+  signTransaction,
+} from "./lib/walletkit";
 import { createBill as contractCreateBill, markPaid as contractMarkPaid, CONTRACT_ID } from "./lib/contract";
 
 // ── 3 Error Types (Level 2 requirement) ───────────────────────────
@@ -219,7 +225,8 @@ export default function App() {
   const [wallet, setWallet] = useState(null);
   const [walletType, setWalletType] = useState(null);
   const [balance, setBalance] = useState(null);
-  const [connecting, setConnecting] = useState(false);
+  const [connecting, setConnecting] = useState(null); // null | 'freighter' | 'albedo'
+  const [showModal, setShowModal] = useState(false);
   const [bills, setBills] = useState([]);
   const [activeTab, setActiveTab] = useState("create");
   const [form, setForm] = useState({ description: "", totalAmount: "", currency: "XLM", participants: "" });
@@ -240,22 +247,31 @@ export default function App() {
     return () => clearInterval(id);
   }, [wallet]);
 
-  // ── Connect via StellarWalletsKit modal ───────────────────────
-  const handleConnect = async () => {
-    setConnecting(true);
+  // ── Connect with specific wallet ─────────────────────────────
+  const handleConnectWith = async (type) => {
+    setConnecting(type);
+    setShowModal(false);
     setError(null);
     try {
-      const address = await connectWallet();
+      let address;
+      if (type === "freighter") {
+        address = await connectFreighter();
+      } else if (type === "albedo") {
+        address = await connectAlbedo();
+      } else {
+        throw Object.assign(new Error("Wallet not supported yet."), { name: "WalletNotFoundError" });
+      }
+      setActiveWallet(type, address);
       setWallet(address);
-      setWalletType("StellarWalletsKit");
-      pushEvent("WALLET_CONNECTED", address.slice(0, 10) + "..." + address.slice(-6));
+      setWalletType(type);
+      pushEvent("WALLET_CONNECTED", `${type.toUpperCase()} · ` + address.slice(0, 10) + "...");
       pushEvent("NETWORK", "Stellar Testnet");
     } catch (err) {
       const classified = classifyError(err);
       setError(classified);
       pushEvent("ERROR", classified.name + ": " + classified.message.slice(0, 50));
     } finally {
-      setConnecting(false);
+      setConnecting(null);
     }
   };
 
@@ -268,6 +284,7 @@ export default function App() {
     setTxStatus("idle");
     setTxHash(null);
     setError(null);
+    setShowModal(false);
     pushEvent("WALLET_DISCONNECTED", "User disconnected");
   };
 
@@ -428,48 +445,61 @@ export default function App() {
             <>
               <p style={{ fontSize: 12, fontWeight: 700, color: "#64748b", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Connect Wallet</p>
               <p style={{ fontSize: 13, color: "#475569", marginBottom: 16, lineHeight: 1.6 }}>
-                Choose from <strong style={{ color: "#e2e8f0" }}>Freighter, xBull, Albedo, Lobstr</strong> and more to get started.
+                Choose your wallet to split bills on <strong style={{ color: "#e2e8f0" }}>Stellar Testnet</strong>.
               </p>
-
-              {/* Wallet options preview */}
-              <div style={{ display: "flex", gap: 8, marginBottom: 16, justifyContent: "center" }}>
-                {["🟣 Freighter", "🐂 xBull", "🔵 Albedo", "🦞 Lobstr"].map((w) => (
-                  <div key={w} style={{ fontSize: 11, background: "#020817", border: "1px solid #1e293b", borderRadius: 8, padding: "4px 10px", color: "#64748b" }}>
-                    {w}
-                  </div>
-                ))}
-              </div>
 
               {error && <ErrorBanner error={error} onDismiss={() => setError(null)} />}
 
-              <button
-                onClick={handleConnect}
-                disabled={connecting}
-                style={{ ...S.btn, opacity: connecting ? 0.7 : 1 }}
-                onMouseEnter={e => !connecting && (e.target.style.transform = "scale(1.01)")}
-                onMouseLeave={e => (e.target.style.transform = "scale(1)")}>
-                {connecting ? (
-                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                    <span style={{ width: 14, height: 14, border: "2px solid #ffffff50", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.8s linear infinite", display: "inline-block" }} />
-                    Opening Wallet Selector...
-                  </span>
-                ) : "🔗 Connect Wallet"}
-              </button>
+              {showModal ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
+                  {[
+                    { id: "freighter", icon: "🟣", name: "Freighter", desc: "Browser extension — most reliable" },
+                    { id: "albedo", icon: "🔵", name: "Albedo", desc: "Web wallet — no install needed" },
+                  ].map((w) => (
+                    <button
+                      key={w.id}
+                      onClick={() => handleConnectWith(w.id)}
+                      disabled={!!connecting}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 14,
+                        background: connecting === w.id ? "#3b82f620" : "#020817",
+                        border: `1px solid ${connecting === w.id ? "#3b82f6" : "#1e293b"}`,
+                        borderRadius: 12, padding: "12px 16px",
+                        cursor: connecting ? "not-allowed" : "pointer",
+                        fontFamily: "inherit", transition: "all 0.2s", width: "100%", textAlign: "left",
+                      }}
+                    >
+                      <span style={{ fontSize: 26 }}>{w.icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontWeight: 700, color: "#e2e8f0", fontSize: 14 }}>{w.name}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: "#475569" }}>{w.desc}</p>
+                      </div>
+                      {connecting === w.id && (
+                        <span style={{ width: 16, height: 16, border: "2px solid #3b82f6", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", display: "inline-block" }} />
+                      )}
+                    </button>
+                  ))}
+                  <button onClick={() => setShowModal(false)} style={{ ...S.btnSm, width: "100%", marginTop: 4 }}>Cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => setShowModal(true)} style={S.btn}>
+                  🔗 Connect Wallet
+                </button>
+              )}
 
               <p style={{ fontSize: 11, color: "#1e293b", textAlign: "center", marginTop: 10 }}>
-                Powered by{" "}
-                <a href="https://stellarwalletskit.dev" target="_blank" rel="noopener noreferrer" style={{ color: "#334155", textDecoration: "none" }}>
-                  StellarWalletsKit
-                </a>
+                Multi-wallet · Stellar Testnet
               </p>
             </>
           ) : (
             <div style={{ animation: "fadeIn 0.3s ease" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>👛</div>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+                    {walletType === "freighter" ? "🟣" : walletType === "albedo" ? "🔵" : "👛"}
+                  </div>
                   <div>
-                    <p style={{ margin: 0, fontSize: 10, color: "#64748b", fontWeight: 700, letterSpacing: "0.05em" }}>CONNECTED · TESTNET</p>
+                    <p style={{ margin: 0, fontSize: 10, color: "#64748b", fontWeight: 700, letterSpacing: "0.05em" }}>{(walletType || "WALLET").toUpperCase()} · TESTNET</p>
                     <p style={{ margin: 0, fontSize: 13, fontFamily: "monospace", color: "#e2e8f0" }}>{wallet.slice(0, 10)}...{wallet.slice(-8)}</p>
                   </div>
                 </div>
