@@ -6,4 +6,14 @@ export default defineConfig({
   define: {
     global: "globalThis",
   },
+  optimizeDeps: {
+    // Exclude from pre-bundling — these use preact/twind/DOM at module init
+    exclude: ["@creit.tech/stellar-wallets-kit"],
+  },
+  build: {
+    rollupOptions: {
+      // Ensure no issues when building for production
+      external: [],
+    },
+  },
 });
