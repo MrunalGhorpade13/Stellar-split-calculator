@@ -3,7 +3,7 @@
 Split bills trustlessly on the Stellar blockchain.
 A multi-wallet dApp integrated with a deployed Soroban smart contract.
 
-**Live Demo:** [stellar-split.vercel.app](https://stellar-split.vercel.app) *(update after Vercel deploy)*
+**Live Demo:** [https://stellar-split-calculator.vercel.app](https://stellar-split-calculator.vercel.app)
 **Contract Address:** `CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4` *(update after deploy)*
 **Example Transaction:** [View on Stellar Expert](https://stellar.expert/explorer/testnet)
 
